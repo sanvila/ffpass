@@ -331,7 +331,7 @@ def main_export(args):
         return
     jsonLogins = getJsonLogins(args.directory)
     logins = exportLogins(key, jsonLogins)
-    writer = csv.writer(args.file)
+    writer = csv.writer(args.file, lineterminator = "\n")
     writer.writerow(["hostname", "username", "password", "formSubmitURL", "httpRealm", "usernameField", "passwordField"])
     writer.writerows(logins)
 
