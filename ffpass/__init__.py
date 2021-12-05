@@ -223,6 +223,10 @@ def exportLogins(key, jsonLogins):
                 row["hostname"],
                 decodeLoginData(key, encUsername),
                 decodeLoginData(key, encPassword),
+                row["formSubmitURL"],
+                row["httpRealm"],
+                row["usernameField"],
+                row["passwordField"],
             )
         )
     return logins
@@ -238,7 +242,7 @@ def readCSV(csv_file):
     logins = []
     reader = csv.DictReader(lower_header(csv_file))
     for row in reader:
-        logins.append((rawURL(row["url"]), row["username"], row["password"]))
+        logins.append((rawURL(row["hostname"]), row["username"], row["password"], row["formsubmiturl"], row["httprealm"], row["usernamefield"], row["passwordfield"]))
     logging.info(f'read {len(logins)} logins')
     return logins
 
@@ -252,15 +256,15 @@ def addNewLogins(key, jsonLogins, logins):
     nextId = jsonLogins["nextId"]
     timestamp = int(datetime.now().timestamp() * 1000)
     logging.info('adding logins')
-    for i, (url, username, password) in enumerate(logins, nextId):
+    for i, (url, username, password, submiturl, realm, ufield, pfield) in enumerate(logins, nextId):
         logging.debug(f'adding {url} {username}')
         entry = {
             "id": i,
             "hostname": url,
-            "httpRealm": None,
-            "formSubmitURL": "",
-            "usernameField": "",
-            "passwordField": "",
+            "httpRealm": realm,
+            "formSubmitURL": submiturl,
+            "usernameField": ufield,
+            "passwordField": pfield,
             "encryptedUsername": encodeLoginData(key, username),
             "encryptedPassword": encodeLoginData(key, password),
             "guid": "{%s}" % uuid4(),
@@ -328,7 +332,7 @@ def main_export(args):
     jsonLogins = getJsonLogins(args.directory)
     logins = exportLogins(key, jsonLogins)
     writer = csv.writer(args.file)
-    writer.writerow(["url", "username", "password"])
+    writer.writerow(["hostname", "username", "password", "formSubmitURL", "httpRealm", "usernameField", "passwordField"])
     writer.writerows(logins)
 
 
